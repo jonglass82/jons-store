@@ -1,9 +1,16 @@
 const express = require('express');
+var cors = require('cors');
 const app = express();
+const bodyParser  = require('body-parser');
 const port = 3001;
 require('dotenv').config();
 const MongoClient = require('mongodb').MongoClient;
 const url = `mongodb+srv://jonglass:${process.env.MONGO_DB_PASSWORD}@cluster0-w4qcc.mongodb.net/jonsStore?retryWrites=true&w=majority`;
+
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
 
 let mongoDb;
 
@@ -17,21 +24,22 @@ MongoClient.connect(url, function(err,db){
   }
 });
 
-app.use((request, response, next) => {
-  response.header("Access-Control-Allow-Origin", "*"); 
-  next(); 
-});
+app.use(cors());
 
 app.get('/api/products', async (req,res) => {
   const products = await mongoDb.collection('products').find().toArray();
-  console.log(products)
   res.json(products)
 });
 
+app.post('/api/create', cors(), (req,res) => {
+  console.log(req.body);
+  // const products = await mongoDb.collection('products');
+  // products.insertOne({title: req.body.title, description: req.body.description, price: req.body.price});
+})
 
-app.get('/api/product', function (req, res) {
-  res.send("here is the product you wanted to see!");
-  console.log("received your get request!");
-});
+app.post('/api/login', (req,res) => {
+  console.log("hit the login route!");
+  // console.log(req.data);
+})
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
