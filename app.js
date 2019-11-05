@@ -1,6 +1,7 @@
 const express = require('express');
 var cors = require('cors');
 const app = express();
+const jwt = require('jsonwebtoken');
 const bodyParser  = require('body-parser');
 const port = 3001;
 require('dotenv').config();
@@ -26,10 +27,13 @@ MongoClient.connect(url, function(err,db){
 
 app.use(cors());
 
+
 app.get('/api/products', async (req,res) => {
   const products = await mongoDb.collection('products').find().toArray();
   res.json(products)
 });
+
+
 
 app.post('/api/create', cors(), (req,res) => {
   console.log(req.body);
@@ -37,9 +41,27 @@ app.post('/api/create', cors(), (req,res) => {
   // products.insertOne({title: req.body.title, description: req.body.description, price: req.body.price});
 })
 
-app.post('/api/login', (req,res) => {
-  console.log("hit the login route!");
-  // console.log(req.data);
+
+
+app.post('/api/login', async (req,res) => {
+
+  const user = await mongoDb.collection('user').findOne({
+    email: req.body.email,
+    password: req.body.password
+  });
+
+  const token = jwt.sign({
+    id: user._id
+  }, process.env.SECRET_KEY)
+
+  if (user){
+    res.json({ authenticated: true, token: token })
+  }
+  else{
+    res.send("invalid login");
+  }
 })
+
+
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
