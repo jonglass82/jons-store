@@ -35,10 +35,21 @@ app.get('/api/products', async (req,res) => {
 
 
 
-app.post('/api/create', cors(), (req,res) => {
+app.post('/api/create', cors(), async (req,res) => {
   console.log(req.body);
-  // const products = await mongoDb.collection('products');
-  // products.insertOne({title: req.body.title, description: req.body.description, price: req.body.price});
+
+  const legit = jwt.verify(req.body.auth, process.env.SECRET_KEY);
+
+  if (legit){
+
+  const products = await mongoDb.collection('products');
+
+  products.insertOne({title: req.body.title, description: req.body.description, price: req.body.price});
+  }
+  else{
+    res.send("You do not have access!!!")
+  }
+
 })
 
 
@@ -50,11 +61,11 @@ app.post('/api/login', async (req,res) => {
     password: req.body.password
   });
 
-  const token = jwt.sign({
-    id: user._id
-  }, process.env.SECRET_KEY)
-
   if (user){
+    const token = jwt.sign({
+      id: user._id
+    }, process.env.SECRET_KEY)
+
     res.json({ authenticated: true, token: token })
   }
   else{
