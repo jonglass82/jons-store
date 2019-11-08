@@ -3,6 +3,7 @@ var cors = require('cors');
 const app = express();
 const jwt = require('jsonwebtoken');
 const bodyParser  = require('body-parser');
+const ObjectId = require('mongodb').ObjectID;
 const port = 3001;
 require('dotenv').config();
 const MongoClient = require('mongodb').MongoClient;
@@ -71,6 +72,28 @@ app.post('/api/login', async (req,res) => {
   else{
     res.send("invalid login");
   }
+})
+
+
+
+app.put('/api/update/:id', async (req,res) => {
+
+  const product = await mongoDb.collection('products').findOne({
+    _id : ObjectId(req.params.id)
+  })
+
+  if (product){
+    mongoDb.collection('products').updateOne(
+    {_id: ObjectId(req.params.id)}, 
+      { $set: { title: req.body.newTitle, description: req.body.description, price: req.body.newPrice } }
+    );
+
+    console.log("product has been updated!!!")
+  }
+  else{
+    console.log("no product found ... ")
+  }
+
 })
 
 
