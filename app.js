@@ -54,7 +54,6 @@ app.post('/api/create', cors(), async (req,res) => {
 })
 
 
-
 app.post('/api/login', async (req,res) => {
 
   const user = await mongoDb.collection('user').findOne({
@@ -75,7 +74,6 @@ app.post('/api/login', async (req,res) => {
 })
 
 
-
 app.put('/api/update/:id', async (req,res) => {
 
   const product = await mongoDb.collection('products').findOne({
@@ -84,18 +82,21 @@ app.put('/api/update/:id', async (req,res) => {
 
   if (product){
     mongoDb.collection('products').updateOne(
-    {_id: ObjectId(req.params.id)}, 
-      { $set: { title: req.body.newTitle, description: req.body.description, price: req.body.newPrice } }
+      {_id: ObjectId(req.params.id)}, 
+      { $set: { 
+        title: req.body.newTitle, 
+        description: req.body.newDescription, 
+        price: req.body.newPrice 
+      } }
     );
 
-    console.log("product has been updated!!!")
+    console.log(req.body)
   }
   else{
     console.log("no product found ... ")
   }
 
 })
-
 
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
