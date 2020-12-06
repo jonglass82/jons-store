@@ -9,6 +9,7 @@ const port = 3001;
 require('dotenv').config();
 const MongoClient = require('mongodb').MongoClient;
 const url = `mongodb+srv://jonglass:${process.env.MONGO_DB_PASSWORD}@cluster0-w4qcc.mongodb.net/jonsStore?retryWrites=true&w=majority`;
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -65,7 +66,45 @@ app.post('/api/create', cors(), async (req,res) => {
     res.send("You do not have access!!!")
   }
 
-})
+});
+
+
+app.post("/create-payment-intent", async (req, res) => {
+  const { items } = req.body;
+  // Create a PaymentIntent with the order amount and currency
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: '100',
+    currency: "usd"
+  });
+  res.send({
+    clientSecret: paymentIntent.client_secret
+  });
+});
+
+
+
+app.post('/make-payment', async (req, res) => {
+
+  console.log('here is the request body: ',req);
+
+    // const token = request.body.stripeToken;
+
+    // const charge = await stripe.charges.create({
+    //   amount: 999,
+    //   currency: 'usd',
+    //   description: 'Example charge',
+    //   source: token,
+    // });
+
+    // if (charge) {
+      // res.send('Payment SUCCESSFULL');
+      // res.json({payment_confirmation: charge})
+    // }
+    // else{
+    //   res.send()
+    // }
+
+});
 
 
 app.post('/api/login', async (req,res) => {
