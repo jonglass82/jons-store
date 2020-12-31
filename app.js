@@ -70,10 +70,10 @@ app.post('/api/create', cors(), async (req,res) => {
 
 
 app.post("/create-payment-intent", async (req, res) => {
-  const { items } = req.body;
+  const { total } = req.body;
   // Create a PaymentIntent with the order amount and currency
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: '100',
+    amount: total,
     currency: "usd"
   });
   res.send({
@@ -81,29 +81,12 @@ app.post("/create-payment-intent", async (req, res) => {
   });
 });
 
+app.post("/check-carted-items", async (req, res) => {
+  // const { cartedItems } = req.body;
+  // loop through all carted items and make sure all are still available
+  console.log(req);
 
-
-app.post('/make-payment', async (req, res) => {
-
-  console.log('here is the request body: ',req);
-
-    // const token = request.body.stripeToken;
-
-    // const charge = await stripe.charges.create({
-    //   amount: 999,
-    //   currency: 'usd',
-    //   description: 'Example charge',
-    //   source: token,
-    // });
-
-    // if (charge) {
-      // res.send('Payment SUCCESSFULL');
-      // res.json({payment_confirmation: charge})
-    // }
-    // else{
-    //   res.send()
-    // }
-
+  res.send('ok to sell');
 });
 
 
