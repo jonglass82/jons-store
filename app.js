@@ -71,9 +71,9 @@ app.post('/api/create', cors(), async (req,res) => {
 
 app.post("/create-payment-intent", async (req, res) => {
   const { total } = req.body;
-  // Create a PaymentIntent with the order amount and currency
+
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: total,
+    amount: Math.floor(total*100),
     currency: "usd"
   });
   res.send({
@@ -81,13 +81,81 @@ app.post("/create-payment-intent", async (req, res) => {
   });
 });
 
-app.post("/check-carted-items", async (req, res) => {
-  // const { cartedItems } = req.body;
-  // loop through all carted items and make sure all are still available
-  console.log(req);
 
-  res.send('ok to sell');
+
+app.post("/check-carted-items", async (req, res) => {
+  const { cartedItems } = req.body;
+  const itemsNotFound = [];
+  const products = await mongoDb.collection('products').find().toArray();
+
+  cartedItems.forEach((cartedItem)=>{
+
+      let foundCount = 0;
+
+      products.forEach((product)=>{
+        if(cartedItem._id == product._id && product.available == 'yes'){
+          console.log('here is the matched product: ', product);
+          foundCount ++;
+          return;
+        }
+      });
+
+      if(foundCount == 0){
+        itemsNotFound.push(cartedItem);
+      }
+  });
+
+  if(itemsNotFound.length > 0){
+    res.json({status: false, itemsNotFound: itemsNotFound});
+  }
+  else{
+    res.json({status: true});
+  }
+
 });
+
+app.post('/create-order', async (req,res) => {
+
+  const legit = (req.body.auth == process.env.EXHIBITB);
+
+  if (legit){
+
+      const orders = await mongoDb.collection('orders');
+      const products = await mongoDb.collection('products').find().toArray();
+
+      if(orders){
+        orders.insertOne({
+          name: req.body.name,
+          email: req.body.email,
+          phone: req.body.phone,
+          address: req.body.address,
+          city: req.body.city,
+          state: req.body.state,
+          zip: req.body.zip,
+          message: req.body.message,
+          items: [],
+          total: req.body.total
+        });
+      }
+
+      if (products){
+        req.body.items.forEach((item)=>{
+            mongoDb.collection('products').updateOne(
+              {_id: ObjectId(item._id)}, 
+              { $set: { 
+                sold: 'yes', 
+                available: 'no'
+              } }
+            );
+        });
+        }
+      console.log("your order has been placed")
+    }
+    else{
+      res.send("You do not have access!!!")
+    }
+
+})
 
 
 app.post('/api/login', async (req,res) => {
