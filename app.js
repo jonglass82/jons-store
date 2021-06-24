@@ -8,7 +8,7 @@ const ObjectId = require('mongodb').ObjectID;
 const port = 3001;
 require('dotenv').config();
 const MongoClient = require('mongodb').MongoClient;
-const url = `mongodb+srv://jonglass:${process.env.MONGO_DB_PASSWORD}@cluster0-w4qcc.mongodb.net/jonsStore?retryWrites=true&w=majority`;
+const url = `mongodb+srv://jonglass:${process.env.MONGO_DB_PASSWORD}@cluster0-w4qcc.mongodb.net/jonsStore?retryWrites=true&w=majority&useNewUrlParser=true`;
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -84,37 +84,42 @@ app.post("/create-payment-intent", async (req, res) => {
 
 
 app.post("/check-carted-items", async (req, res) => {
+
+  //check if items in customer's cart have already been sold
+
   const { cartedItems } = req.body;
   const itemsNotFound = [];
   const products = await mongoDb.collection('products').find().toArray();
 
-  cartedItems.forEach((cartedItem)=>{
+    cartedItems.forEach((cartedItem)=>{
 
-      let foundCount = 0;
+        let foundCount = 0;
 
-      products.forEach((product)=>{
-        if(cartedItem._id == product._id && product.available == 'yes'){
-          console.log('here is the matched product: ', product);
-          foundCount ++;
-          return;
+        products.forEach((product)=>{
+          if(cartedItem._id == product._id && product.available == 'yes'){
+            console.log('here is the matched product: ', product);
+            foundCount ++;
+            return;
+          }
+        });
+
+        if(foundCount == 0){
+          itemsNotFound.push(cartedItem);
         }
-      });
+    });
 
-      if(foundCount == 0){
-        itemsNotFound.push(cartedItem);
-      }
-  });
-
-  if(itemsNotFound.length > 0){
-    res.json({status: false, itemsNotFound: itemsNotFound});
-  }
-  else{
-    res.json({status: true});
-  }
+    if(itemsNotFound.length > 0){
+      res.json({status: false, itemsNotFound: itemsNotFound});
+    }
+    else{
+      res.json({status: true});
+    }
 
 });
 
 app.post('/create-order', async (req,res) => {
+
+  //proceed with creating the order
 
   const legit = (req.body.auth == process.env.EXHIBITB);
 
@@ -133,7 +138,7 @@ app.post('/create-order', async (req,res) => {
           state: req.body.state,
           zip: req.body.zip,
           message: req.body.message,
-          items: [],
+          items: req.body.cartedItems,
           total: req.body.total
         });
       }
