@@ -143,6 +143,9 @@ app.post('/create-order', async (req,res) => {
         });
       }
 
+      //send email
+      //send text
+
       if (products){
         req.body.items.forEach((item)=>{
             mongoDb.collection('products').updateOne(
