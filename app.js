@@ -10,9 +10,21 @@ require('dotenv').config();
 const MongoClient = require('mongodb').MongoClient;
 const url = `mongodb+srv://jonglass:${process.env.MONGO_DB_PASSWORD}@cluster0-w4qcc.mongodb.net/jonsStore?retryWrites=true&w=majority&useNewUrlParser=true`;
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { createProxyMiddleware } = require('http-proxy-middleware');
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.use('/api/products', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/api/products', changeOrigin: true }));
+app.use('/api/create', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/api/create', changeOrigin: true }));
+app.use('/create-payment-intent', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/create-payment-intent', changeOrigin: true }));
+app.use('/check-carted-items', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/check-carted-items', changeOrigin: true }));
+app.use('/create-order', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/create-order', changeOrigin: true }));
+app.use('/api/login', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/api/login', changeOrigin: true }));
+app.use('/api/update/:id', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/api/update/:id', changeOrigin: true }));
+
+
 
 cloudinary.config({ 
   cloud_name: '${process.env.CLOUD_NAME}', 
