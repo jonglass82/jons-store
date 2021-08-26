@@ -16,13 +16,13 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use('/api/products', createProxyMiddleware({ changeOrigin: true }));
-app.use('/api/create', createProxyMiddleware({ changeOrigin: true }));
-app.use('/create-payment-intent', createProxyMiddleware({ changeOrigin: true }));
-app.use('/check-carted-items', createProxyMiddleware({ changeOrigin: true }));
-app.use('/create-order', createProxyMiddleware({ changeOrigin: true }));
-app.use('/api/login', createProxyMiddleware({ changeOrigin: true }));
-app.use('/api/update/:id', createProxyMiddleware({ changeOrigin: true }));
+app.use('/api/products', createProxyMiddleware({ target: '/api/products', changeOrigin: true }));
+app.use('/api/create', createProxyMiddleware({ target: '/api/create', changeOrigin: true }));
+app.use('/create-payment-intent', createProxyMiddleware({ target: '/create-payment-intent', changeOrigin: true }));
+app.use('/check-carted-items', createProxyMiddleware({ target: '/check-carted-items', changeOrigin: true }));
+app.use('/create-order', createProxyMiddleware({ target: '/create-order', changeOrigin: true }));
+app.use('/api/login', createProxyMiddleware({ target: '/api/login', changeOrigin: true }));
+app.use('/api/update/:id', createProxyMiddleware({ target: '/api/update/:id', changeOrigin: true }));
 
 
 
