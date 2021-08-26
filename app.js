@@ -16,13 +16,13 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use('/api/products', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/api/products', changeOrigin: true }));
-app.use('/api/create', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/api/create', changeOrigin: true }));
-app.use('/create-payment-intent', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/create-payment-intent', changeOrigin: true }));
-app.use('/check-carted-items', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/check-carted-items', changeOrigin: true }));
-app.use('/create-order', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/create-order', changeOrigin: true }));
-app.use('/api/login', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/api/login', changeOrigin: true }));
-app.use('/api/update/:id', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/api/update/:id', changeOrigin: true }));
+app.use('/api/products', createProxyMiddleware({ changeOrigin: true }));
+app.use('/api/create', createProxyMiddleware({ changeOrigin: true }));
+app.use('/create-payment-intent', createProxyMiddleware({ changeOrigin: true }));
+app.use('/check-carted-items', createProxyMiddleware({ changeOrigin: true }));
+app.use('/create-order', createProxyMiddleware({ changeOrigin: true }));
+app.use('/api/login', createProxyMiddleware({ changeOrigin: true }));
+app.use('/api/update/:id', createProxyMiddleware({ changeOrigin: true }));
 
 
 
