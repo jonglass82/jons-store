@@ -10,13 +10,13 @@ require('dotenv').config();
 const MongoClient = require('mongodb').MongoClient;
 const url = `mongodb+srv://jonglass:${process.env.MONGO_DB_PASSWORD}@cluster0-w4qcc.mongodb.net/jonsStore?retryWrites=true&w=majority&useNewUrlParser=true`;
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { createProxyMiddleware } = require('http-proxy-middleware');
+// const { createProxyMiddleware } = require('http-proxy-middleware');
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use('/api', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com', changeOrigin: true }));
+// app.use('/api', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com', changeOrigin: true }));
 
 
 // app.use('/api/products', createProxyMiddleware({ target: 'https://jons-store.herokuapp.com/', changeOrigin: true }));
