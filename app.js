@@ -5,7 +5,7 @@ const cloudinary = require('cloudinary').v2;
 const jwt = require('jsonwebtoken');
 const bodyParser  = require('body-parser');
 const ObjectId = require('mongodb').ObjectID;
-const port = 3001;
+const port = process.env.PORT || 80;
 require('dotenv').config();
 const MongoClient = require('mongodb').MongoClient;
 const url = `mongodb+srv://jonglass:${process.env.MONGO_DB_PASSWORD}@cluster0-w4qcc.mongodb.net/jonsStore?retryWrites=true&w=majority&useNewUrlParser=true`;
