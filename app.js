@@ -69,7 +69,7 @@ app.post('/api/create', cors(), async (req,res) => {
 });
 
 
-app.post("/create-payment-intent", async (req, res) => {
+app.post("/api/create-payment-intent", async (req, res) => {
   const { total } = req.body;
 
   const paymentIntent = await stripe.paymentIntents.create({
@@ -83,7 +83,7 @@ app.post("/create-payment-intent", async (req, res) => {
 
 
 
-app.post("/check-carted-items", async (req, res) => {
+app.post("/api/check-carted-items", async (req, res) => {
 
   //check if items in customer's cart have already been sold
 
@@ -117,7 +117,7 @@ app.post("/check-carted-items", async (req, res) => {
 
 });
 
-app.post('/create-order', async (req,res) => {
+app.post('/api/create-order', async (req,res) => {
 
   //proceed with creating the order
 
