@@ -138,7 +138,7 @@ app.post('/api/create-order', async (req,res) => {
           state: req.body.state,
           zip: req.body.zip,
           message: req.body.message,
-          items: req.body.cartedItems,
+          items: req.body.items,
           total: req.body.total
         });
       }
