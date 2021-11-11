@@ -10,6 +10,9 @@ require('dotenv').config();
 const MongoClient = require('mongodb').MongoClient;
 const url = `mongodb+srv://jonglass:${process.env.MONGO_DB_PASSWORD}@cluster0-w4qcc.mongodb.net/jonsStore?retryWrites=true&w=majority&useNewUrlParser=true`;
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = require('twilio')(accountSid, authToken);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -38,6 +41,11 @@ app.use(cors());
 app.get('/api/products', async (req,res) => {
   const products = await mongoDb.collection('products').find().toArray();
   res.json(products)
+});
+
+app.get('/api/collectibles', async (req,res) => {
+  const collectibles = await mongoDb.collection('Collectibles').find().toArray();
+  res.json(collectibles)
 });
 
 
@@ -144,7 +152,13 @@ app.post('/api/create-order', async (req,res) => {
       }
 
       //send email
-      //send text
+
+      //send text message to me
+      client.messages.create({
+           body: 'YOU GOT A SALE !!!',
+           from: '${process.env.TWILIO_NUMBER}',
+           to: '${process.env.JONS_NUMBER}'
+      }).then(message => console.log(message.sid));
 
       if (products){
         req.body.items.forEach((item)=>{
