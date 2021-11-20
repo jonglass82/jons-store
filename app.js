@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const cloudinary = require('cloudinary').v2;
 const jwt = require('jsonwebtoken');
 const bodyParser  = require('body-parser');
 const ObjectId = require('mongodb').ObjectID;
@@ -13,15 +12,12 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = require('twilio')(accountSid, authToken);
+const sgMail = require('@sendgrid/mail');
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-cloudinary.config({ 
-  cloud_name: '${process.env.CLOUD_NAME}', 
-  api_key: '${process.env.CLOUDINARY_KEY}', 
-  api_secret: '${process.env.CLOUDINARY_SECRET}' 
-});
 
 let mongoDb;
 
@@ -42,6 +38,8 @@ app.get('/api/products', async (req,res) => {
   const products = await mongoDb.collection('products').find().toArray();
   res.json(products)
 });
+
+
 
 app.get('/api/collectibles', async (req,res) => {
   const collectibles = await mongoDb.collection('Collectibles').find().toArray();
@@ -67,7 +65,6 @@ app.post('/api/create', cors(), async (req,res) => {
         category: req.body.category, 
         images: req.body.images
       });
-      console.log("your product has been created!")
     }
 
   else{
@@ -105,7 +102,6 @@ app.post("/api/check-carted-items", async (req, res) => {
 
         products.forEach((product)=>{
           if(cartedItem._id == product._id && product.available == 'yes'){
-            console.log('here is the matched product: ', product);
             foundCount ++;
             return;
           }
@@ -136,6 +132,7 @@ app.post('/api/create-order', async (req,res) => {
       const orders = await mongoDb.collection('orders');
       const products = await mongoDb.collection('products').find().toArray();
 
+      //Insert the order
       if(orders){
         orders.insertOne({
           name: req.body.name,
@@ -151,15 +148,64 @@ app.post('/api/create-order', async (req,res) => {
         });
       }
 
-      //send email
-
-      //send text message to me
+      //Send text message to me
       client.messages.create({
-           body: 'YOU GOT A SALE !!!',
-           from: '${process.env.TWILIO_NUMBER}',
-           to: '${process.env.JONS_NUMBER}'
-      }).then(message => console.log(message.sid));
+         body: 'YOU GOT A SALE !!!',
+         from: process.env.TWILIO_NUMBER,
+         to: process.env.JONS_NUMBER
+      }).then(message => console.log(message)).catch(err => console.log(err));
 
+      //Send email to me
+      const msgToMe = {
+        to: 'jonglass82@gmail.com',
+        from: 'jonglasswebsite@gmail.com',
+        subject: 'Order Received',
+        text: 'Order details:',
+        html: `<div><strong>Order details:</strong>
+          <ul>
+            <li>Name: ${req.body.name}</li>
+            <li>Email: ${req.body.email}</li>
+            <li>Phone: ${req.body.phone}</li>
+            <li>Address: ${req.body.address}</li>
+            <li>City: ${req.body.city}</li>
+            <li>Zip: ${req.body.zip}</li>
+            <li>Message: ${req.body.message}</li>
+            <li>Items: ${req.body.items}</li>
+            <li>Order total: ${req.body.total}</li>
+          </ul>
+          </div>`,
+      }
+
+      sgMail
+        .send(msgToMe)
+        .then((response) => {
+          console.log(response[0].statusCode)
+          console.log(response[0].headers)
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+
+      //Send email to the buyer
+      const msgToCustomer = {
+        to: req.body.email,
+        from: 'jonglasswebsite@gmail.com',
+        subject: 'Thank you for your purchase',
+        text: 'Thank you so much for your purchase from www.jon-glass.com',
+        html: '<div><strong>Order details:</strong><p>Your order will be processed within 24 hours. I will follow up with you at the contact information you provided and provide tracking information.</p><p>Thanks again!</p><p>- Jon Glass</p></div>',
+      }
+
+      sgMail
+        .send(msgToCustomer)
+        .then((response) => {
+          console.log(response[0].statusCode)
+          console.log(response[0].headers)
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+
+      //Set the item to sold
       if (products){
         req.body.items.forEach((item)=>{
             mongoDb.collection('products').updateOne(
@@ -171,7 +217,6 @@ app.post('/api/create-order', async (req,res) => {
             );
         });
         }
-      console.log("your order has been placed")
     }
     else{
       res.send("You do not have access!!!")
