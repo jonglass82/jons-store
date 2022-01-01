@@ -8,7 +8,6 @@ const port = process.env.PORT || 5000;
 require('dotenv').config();
 const MongoClient = require('mongodb').MongoClient;
 const url = `mongodb+srv://jonglass:${process.env.MONGO_DB_PASSWORD}@cluster0-w4qcc.mongodb.net/jonsStore?retryWrites=true&w=majority&useNewUrlParser=true`;
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = require('twilio')(accountSid, authToken);
@@ -33,19 +32,15 @@ MongoClient.connect(url, function(err,db){
 
 app.use(cors());
 
-
 app.get('/api/products', async (req,res) => {
   const products = await mongoDb.collection('products').find().toArray();
   res.json(products)
 });
 
-
-
 app.get('/api/collectibles', async (req,res) => {
   const collectibles = await mongoDb.collection('Collectibles').find().toArray();
   res.json(collectibles)
 });
-
 
 app.post('/api/create', cors(), async (req,res) => {
 
@@ -73,25 +68,9 @@ app.post('/api/create', cors(), async (req,res) => {
 
 });
 
-
-app.post("/api/create-payment-intent", async (req, res) => {
-  const { total } = req.body;
-
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: Math.floor(total*100),
-    currency: "usd"
-  });
-  res.send({
-    clientSecret: paymentIntent.client_secret
-  });
-});
-
-
-
 app.post("/api/check-carted-items", async (req, res) => {
 
   //check if items in customer's cart have already been sold
-
   const { cartedItems } = req.body;
   const itemsNotFound = [];
   const products = await mongoDb.collection('products').find().toArray();
@@ -124,7 +103,6 @@ app.post("/api/check-carted-items", async (req, res) => {
 app.post('/api/create-order', async (req,res) => {
 
   //proceed with creating the order
-
   const legit = (req.body.auth == process.env.EXHIBITB);
 
   if (legit){
@@ -144,7 +122,8 @@ app.post('/api/create-order', async (req,res) => {
           zip: req.body.zip,
           message: req.body.message,
           items: req.body.items,
-          total: req.body.total
+          total: req.body.total,
+          paymentDetails: req.body.paymentDetails
         });
       }
 
@@ -216,14 +195,17 @@ app.post('/api/create-order', async (req,res) => {
               } }
             );
         });
-        }
+      }
+
+      //Send a success response to the client
+      res.send("Order successfully placed");
+
     }
     else{
       res.send("You do not have access!!!")
     }
 
 })
-
 
 app.post('/api/login', async (req,res) => {
 
@@ -243,7 +225,6 @@ app.post('/api/login', async (req,res) => {
     res.send("invalid login");
   }
 })
-
 
 app.put('/api/update/:id', async (req,res) => {
 
