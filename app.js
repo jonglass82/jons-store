@@ -7,7 +7,7 @@ const ObjectId = require('mongodb').ObjectID;
 const port = process.env.PORT || 5000;
 require('dotenv').config();
 const MongoClient = require('mongodb').MongoClient;
-const url = `mongodb+srv://jonglass:${process.env.MONGO_DB_PASSWORD}@cluster0-w4qcc.mongodb.net/jonsStore?retryWrites=true&w=majority&useNewUrlParser=true`;
+const url = `mongodb+srv://jonglass:${process.env.MONGO_DB_PASSWORD}@cluster0.w4qcc.mongodb.net/?retryWrites=true&w=majority`;
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = require('twilio')(accountSid, authToken);
